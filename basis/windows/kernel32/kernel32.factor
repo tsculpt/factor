@@ -871,7 +871,7 @@ ALIAS: CopyFile CopyFileW
 ! FUNCTION: CreateDirectoryA
 ! FUNCTION: CreateDirectoryExA
 ! FUNCTION: CreateDirectoryExW
-FUNCTION: BOOL CreateDirectoryW ( LPCTSTR lpPathName, LPSECURITY_ATTRIBUTES lpSecurityAttribytes ) ;
+FUNCTION: BOOL CreateDirectoryW ( LPCTSTR lpPathName, LPSECURITY_ATTRIBUTES lpSecurityAttributes ) ;
 ALIAS: CreateDirectory CreateDirectoryW
 
 ! FUNCTION: CreateEventA
@@ -880,7 +880,7 @@ ALIAS: CreateDirectory CreateDirectoryW
 ! FUNCTION: CreateFiberEx
 
 
-FUNCTION: HANDLE CreateFileW ( LPCTSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttribures, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile ) ;
+FUNCTION: HANDLE CreateFileW ( LPCTSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode, LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes, HANDLE hTemplateFile ) ;
 ALIAS: CreateFile CreateFileW
 
 FUNCTION: HANDLE  CreateFileMappingW ( HANDLE hFile,
@@ -892,7 +892,9 @@ FUNCTION: HANDLE  CreateFileMappingW ( HANDLE hFile,
 ALIAS: CreateFileMapping CreateFileMappingW
 
 ! FUNCTION: CreateHardLinkA
-! FUNCTION: CreateHardLinkW
+FUNCTION: BOOL CreateHardLinkW ( LPCTSTR lpFileName, LPCTSTR lpExistingFileName, LPSECURITY_ATTRIBUTES lpSecurityAttributes ) ;
+ALIAS: CreateHardLink CreateHardLinkW
+
 ! FUNCTION: HANDLE CreateIoCompletionPort ( HANDLE hFileHandle, HANDLE hExistingCompletionPort, ULONG_PTR uCompletionKey, DWORD dwNumberofConcurrentThreads ) ;
 FUNCTION: HANDLE CreateIoCompletionPort ( HANDLE hFileHandle, HANDLE hExistingCompletionPort, void* uCompletionKey, DWORD dwNumberofConcurrentThreads ) ;
 ! FUNCTION: CreateJobObjectA
@@ -958,6 +960,9 @@ FUNCTION: HANDLE CreateRemoteThread ( HANDLE hProcess,
 ! FUNCTION: CreateSemaphoreA
 ! FUNCTION: CreateSemaphoreW
 ! FUNCTION: CreateSocketHandle
+! FUNCTION: CreateSymbolicLinkA
+FUNCTION: BOOL CreateSymbolicLinkW ( LPTSTR lpSymlinkFileName, LPTSTR lpTargetFileName, DWORD dwFlags ) ;
+ALIAS: CreateSymbolicLink CreateSymbolicLinkW
 ! FUNCTION: CreateTapePartition
 ! FUNCTION: CreateThread
 ! FUNCTION: CreateTimerQueue
