@@ -17,3 +17,6 @@ M: windows read-link ( symlink -- path )
 M: windows canonicalize-path ( path -- path' )
     path-components "/"
     [ append-path dup exists? [ follow-links ] when ] reduce ;
+
+! M: windows link-info in io.files.info.windows needs rewriting to
+!  detect links and return link info.
