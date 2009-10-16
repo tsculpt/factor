@@ -1,11 +1,13 @@
 ! Copyright (C) 2009 Brad Christensen.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: io.backend io.files io.files.links io.pathnames kernel
-sequences system windows.errors windows.kernel32 ;
+USING: io.backend io.files io.files.info io.files.links io.pathnames
+kernel sequences system windows.errors windows.kernel32 ;
 IN: io.files.links.windows
 
 M: windows make-link ( target symlink -- )
-    normalize-path f CreateSymbolicLink win32-error=0/f ;
+    [ normalize-path ] bi@ swap dup file-info
+    directory? [ SYMBOLIC_LINK_FLAG_DIRECTORY ] [ SYMBOLIC_LINK_FLAG_FILE ] if
+    CreateSymbolicLink win32-error=0/f ;
 
 M: windows make-hard-link ( target link -- )
     normalize-path f CreateHardLink win32-error=0/f ;
