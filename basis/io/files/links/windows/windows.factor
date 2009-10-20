@@ -22,3 +22,29 @@ M: windows canonicalize-path ( path -- path' )
 
 ! M: windows link-info in io.files.info.windows needs rewriting to
 !  detect links and return link info.
+
+! win32-file-type needs rewrite to include +symlink+
+
+! Use find-first-file-stat to get a WIN32_FIND_DATA structure to
+! determine whether a file or dir has a reparse point. Perform a bit &
+! of dwFileAttributes with FILE_ATTRIBUTE_REPARSE_POINT. If true, read
+! the tag in dwReserved0 to see if it's a IO_REPARSE_TAG_SYMLINK.
+
+! Guard against creating a link to a link of different type: filelink
+! to dir, visa versa.
+
+! MAKE LINK
+! Normalize paths involved
+! Order paths as symlink target
+! Determine symlink type to forge
+! ... based on target's existence
+! ... ... failing that target's ending in path sepatarator mean directory link
+! Create symbolic link.
+
+! HARD LINK
+! Normalize paths involved
+! Order paths as hardlink target
+! Create hard link.
+
+! You are likely to have ot read the reparse point in order to obtain
+! the path a link points to.
