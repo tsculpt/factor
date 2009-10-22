@@ -1,17 +1,20 @@
-! Copyright (C) 2008 Slava Pestov, Doug Coleman.
+! Copyright (C) 2009 Slava Pestov, Doug Coleman, Brad Christensen.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors io.backend io.files.info io.files.types
 io.pathnames kernel math namespaces system vocabs.loader ;
 IN: io.files.links
 
-HOOK: make-link os ( target symlink -- )
-
-HOOK: make-hard-link os ( target link -- )
+HOOK: make-link os ( target link type -- )
 
 HOOK: read-link os ( symlink -- path )
 
-: copy-link ( target symlink -- )
-    [ read-link ] dip make-link ;
+HOOK: copy-link os ( target symlink -- )
+
+SYMBOL: +hard-link+ inline
+
+SYMBOL: +file-soft-link+ inline
+
+SYMBOL: +dir-soft-link+ inline
 
 os unix? [ "io.files.links.unix" require ] when
 
@@ -22,6 +25,8 @@ SYMBOL: symlink-depth
 10 symlink-depth set-global
 
 ERROR: too-many-symlinks path n ;
+
+ERROR: unexpected-link-type type ;
 
 <PRIVATE
 
