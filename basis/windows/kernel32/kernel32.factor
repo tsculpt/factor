@@ -798,6 +798,36 @@ CONSTANT: IO_REPARSE_TAG_MOUNT_POINT HEX: A0000003
 CONSTANT: IO_REPARSE_TAG_SIS         HEX: 80000007
 CONSTANT: IO_REPARSE_TAG_SYMLINK     HEX: A000000C
 
+STRUCT: SYMBOLIC_LINK_REPARSE_BUFFER
+    { SubstituteNameOffset USHORT }
+    { SubstituteNameLength USHORT }
+    { PrintNameOffset USHORT }
+    { PrintNameLength USHORT }
+    { Flags ULONG }
+    { PathBuffer WCHAR[1] } ;
+
+STRUCT: MOUNT_POINT_REPARSE_BUFFER
+    { SubstituteNameOffset USHORT }
+    { SubstituteNameLength USHORT }
+    { PrintNameOffset USHORT }
+    { PrintNameLength USHORT }
+    { PathBuffer WCHAR[1] } ;
+
+STRUCT: GENERIC_REPARSE_BUFFER
+    { DataBuffer UCHAR[1] } ;
+
+UNION-STRUCT: REPARSE_DATA_UNION
+    { SymbolicLinkReparseBuffer SYMBOLIC_LINK_REPARSE_BUFFER }
+    { MountPointReparseBuffer MOUNT_POINT_REPARSE_BUFFER }
+    { GenericReparseBuffer GENERIC_REPARSE_BUFFER } ;
+
+STRUCT: REPARSE_DATA_BUFFER
+    { ReparseTag ULONG }
+    { ReparseDataLength USHORT }
+    { Reserved USHORT }
+    { ReparseDataUnion REPARSE_DATA_UNION } ;
+TYPEDEF: REPARSE_DATA_BUFFER* PREPARSE_DATA_BUFFER
+
 LIBRARY: kernel32
 ! FUNCTION: _hread
 ! FUNCTION: _hwrite
