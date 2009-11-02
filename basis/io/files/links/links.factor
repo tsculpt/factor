@@ -16,17 +16,17 @@ SYMBOL: +file-soft-link+ inline
 
 SYMBOL: +dir-soft-link+ inline
 
-os unix? [ "io.files.links.unix" require ] when
-
-: follow-link ( path -- path' )
-    [ parent-directory ] [ read-link ] bi append-path ;
-
 SYMBOL: symlink-depth
 10 symlink-depth set-global
 
 ERROR: too-many-symlinks path n ;
 
 ERROR: unexpected-link-type type ;
+
+os unix? [ "io.files.links.unix" require ] when
+
+: follow-link ( path -- path' )
+    [ parent-directory ] [ read-link ] bi append-path ;
 
 <PRIVATE
 

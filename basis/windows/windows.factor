@@ -2,4 +2,4 @@
 ! See http://factorcode.org/license.txt for BSD license.
 IN: windows
 
-CONSTANT: MAX_UNICODE_PATH 32768
+CONSTANT: MAX_UNICODE_PATH 32767

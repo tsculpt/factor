@@ -12,6 +12,9 @@ IN: io.files.links.windows
 : (make-symbolic-link) ( symlink target type-flag -- )
     CreateSymbolicLink win32-error=0/f ;
 
+! : (read-symbolic-link) ( symlink -- path )
+DEFER: (read-symbolic-link)
+
 PRIVATE>
 
 M: windows make-link ( target link type -- )
@@ -22,9 +25,12 @@ M: windows make-link ( target link type -- )
         [ unexpected-link-type ]
     } case ;
 
-DEFER: read-symbolic-link
 M: windows read-link ( symlink -- path )
-    normalize-path read-symbolic-link ;
+    normalize-path ;
+!    dup link-info 
+
+!    normalize-path dup symbolic-link?
+!    [ (read-symbolic-link) ] [ not-a-soft-link ] if ;
 
 M: windows copy-link ( target symlink -- )
     [ read-link dup file-info directory?
@@ -36,15 +42,19 @@ M: windows canonicalize-path ( path -- path' )
     [ append-path dup exists? [ follow-links ] when ] reduce ;
 
 ! M: windows link-info in io.files.info.windows needs rewriting to
-!  detect links and return link info.
+! detect links and return file-info using find-first-file-stat, and
+! also set size-on-disk to 0 when file, or max of size/4096 when
+! directory symlink.
 
 ! win32-file-type needs rewrite to include +symlink+
 
 ! Use find-first-file-stat to get a WIN32_FIND_DATA structure to
-! determine whether a file or dir has a reparse point. Perform a bit
-! & of dwFileAttributes with FILE_ATTRIBUTE_REPARSE_POINT using
-! mask?. If true, read the tag in dwReserved0 to see if it's a
+! determine whether a file or dir has a reparse point. The
+! attribute +reparse-point+ will be set. Need to keep the struct to
+! then dig out the reparse tag in dwReserved0 to see if it's a
 ! IO_REPARSE_TAG_SYMLINK.
 
 ! You are likely to have to read the reparse point in order to obtain
 ! the path a link points to.
+
+! get-file-information-stat does not dispose handle to file?

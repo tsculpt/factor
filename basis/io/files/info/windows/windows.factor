@@ -1,12 +1,12 @@
 ! Copyright (C) 2008 Doug Coleman.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: byte-arrays math io.backend io.files.info
+USING: byte-arrays math io.backend io.files.info io.files.types
 io.files.windows io.files.windows.nt kernel windows.kernel32
 windows.time windows accessors alien.c-types combinators
 generalizations system alien.strings io.encodings.utf16n
 sequences splitting windows.errors fry continuations destructors
 calendar ascii combinators.short-circuit locals classes.struct
-specialized-arrays alien.data ;
+specialized-arrays alien.data math.bitwise ;
 SPECIALIZED-ARRAY: ushort
 IN: io.files.info.windows
 
@@ -95,8 +95,15 @@ M: windows file-info ( path -- info )
     [ get-file-information-stat ]
     [ set-windows-size-on-disk ] bi ;
 
+ERROR: not-a-symbolic-link path ;
+
 M: windows link-info ( path -- info )
-    file-info ;
+    dup normalize-path find-first-file-stat
+    dup dwReserved0>> IO_REPARSE_TAG_SYMLINK mask?
+    [ WIN32_FIND_DATA>file-info dup directory?
+        [ dup size>> 4096 round-up-to ]
+        [ 0 ] if >>size-on-disk +symbolic-link+ >>type nip ]
+    [ drop not-a-symbolic-link ] if ;
 
 : volume-information ( normalized-path -- volume-name volume-serial max-component flags type )
     MAX_PATH 1 + [ <ushort-array> ] keep
