@@ -98,11 +98,9 @@ M: windows file-info ( path -- info )
 M: windows link-info ( path -- info )
     normalize-path dup find-first-file-stat dup dwReserved0>>
     IO_REPARSE_TAG_SYMLINK mask?
-    [ WIN32_FIND_DATA>file-info ] dip swapd [ set-windows-size-on-disk ] dip [
-!        dup directory? [ dup size>> 4096 round-up-to ] [ 0 ] if >>size-on-disk
-        dup type>> +regular-file+ =
-        [ +symbolic-link+ >>type 0 >>size-on-disk ] when
-    ] when ;
+    [ WIN32_FIND_DATA>file-info ] dip swapd
+    [ set-windows-size-on-disk ] dip
+    [ +symbolic-link+ >>type ] when ;
 
 : volume-information ( normalized-path -- volume-name volume-serial max-component flags type )
     MAX_PATH 1 + [ <ushort-array> ] keep
