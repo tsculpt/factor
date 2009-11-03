@@ -1,6 +1,6 @@
 ! Copyright (C) 2009 Slava Pestov, Doug Coleman, Brad Christensen.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors io.backend io.files.info io.files.types
+USING: accessors combinators io.backend io.files.info io.files.types
 io.pathnames kernel math namespaces system vocabs.loader ;
 IN: io.files.links
 
@@ -23,7 +23,12 @@ ERROR: too-many-symlinks path n ;
 
 ERROR: unexpected-link-type type ;
 
-os unix? [ "io.files.links.unix" require ] when
+ERROR: not-a-soft-link path ;
+
+{
+    { [ os unix? ] [ "io.files.links.unix" ] }
+    { [ os windows? ] [ "io.files.links.windows" ] }
+} cond require
 
 : follow-link ( path -- path' )
     [ parent-directory ] [ read-link ] bi append-path ;

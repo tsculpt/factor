@@ -1,7 +1,7 @@
 ! Copyright (C) 2009 Brad Christensen.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: io.backend io.files io.files.info io.files.links io.pathnames
-kernel combinators sequences system windows.errors windows.kernel32 ;
+USING: io.backend io.files io.files.info io.files.links io.files.types io.pathnames libc classes.struct accessors alien alien.c-types math io.backend.windows
+destructors kernel combinators sequences system windows.errors windows.kernel32 specialized-arrays strings ;
 IN: io.files.links.windows
 
 <PRIVATE
@@ -12,12 +12,35 @@ IN: io.files.links.windows
 : (make-symbolic-link) ( symlink target type-flag -- )
     CreateSymbolicLink win32-error=0/f ;
 
-! : (read-symbolic-link) ( symlink -- path )
-DEFER: (read-symbolic-link)
+: (initial-reparse-data-buffer) ( -- REPARSE_DATA_BUFFER )
+    MAX_REPARSE_DATA_BUFFER_SIZE 1 calloc REPARSE_DATA_BUFFER memory>struct
+    IO_REPARSE_TAG_SYMLINK >>ReparseTag MAX_REPARSE_DATA_BUFFER_SIZE
+    REPARSE_DATA_BUFFER heap-size - >>ReparseDataLength &free ;
+
+: (reparse-handle) ( path -- win32-file )
+    0 share-mode default-security-attributes OPEN_EXISTING
+    FILE_FLAG_OPEN_REPARSE_POINT f CreateFile dup invalid-handle?
+    <win32-file> &dispose ;
+
+: (get-reparse-point) ( reparse-handle initial-reparse-data-buffer bytes-returned-out -- )
+    [ [ handle>> ] [ >c-ptr ] bi* ] dip [ FSCTL_GET_REPARSE_POINT f 0 ] 2dip
+    [ MAX_REPARSE_DATA_BUFFER_SIZE ] dip f DeviceIoControl win32-error=0/f ;
+
+SPECIALIZED-ARRAY: uchar
+
+: (extract-substitute-path) ( REPARSE_DATA_BUFFER bytes-returned -- substitute-path )
+    [ ReparseDataUnion>> dup GenericReparseBuffer>> >c-ptr ] dip <direct-uchar-array>
+    [ SymbolicLinkReparseBuffer>> [ SubstituteNameOffset>> ] [ SubstituteNameLength>> over + ] bi ] dip
+    <slice> >string ;
+
+: (read-symbolic-link) ( symlink -- path )
+    [ (reparse-handle) (initial-reparse-data-buffer) 0 <ulong>
+        [ (get-reparse-point) ] 2keep *ulong (extract-substitute-path)
+    ] with-destructors ;
 
 PRIVATE>
 
-M: windows make-link ( target link type -- )
+M: winnt make-link ( target link type -- )
     [ normalize-path ] dip swapd {
         { +hard-link+ [ (make-hard-link) ] }
         { +dir-soft-link+ [ SYMBOLIC_LINK_FLAG_DIRECTORY (make-symbolic-link) ] }
@@ -25,19 +48,16 @@ M: windows make-link ( target link type -- )
         [ unexpected-link-type ]
     } case ;
 
-M: windows read-link ( symlink -- path )
-    normalize-path ;
-!    dup link-info 
+M: winnt read-link ( symlink -- path )
+    normalize-path dup link-info type>> +symbolic-link+ =
+    [ (read-symbolic-link) ] [ not-a-soft-link ] if ;
 
-!    normalize-path dup symbolic-link?
-!    [ (read-symbolic-link) ] [ not-a-soft-link ] if ;
-
-M: windows copy-link ( target symlink -- )
+M: winnt copy-link ( target symlink -- )
     [ read-link dup file-info directory?
         [ +dir-soft-link+ ] [ +file-soft-link+ ] if
     ] dip swap make-link ;
 
-M: windows canonicalize-path ( path -- path' )
+M: winnt resolve-symlinks ( path -- path' )
     path-components "/"
     [ append-path dup exists? [ follow-links ] when ] reduce ;
 
@@ -58,3 +78,5 @@ M: windows canonicalize-path ( path -- path' )
 ! the path a link points to.
 
 ! get-file-information-stat does not dispose handle to file?
+
+! link-info fix size / size-on-disk
