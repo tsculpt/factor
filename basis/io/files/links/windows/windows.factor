@@ -1,7 +1,7 @@
 ! Copyright (C) 2009 Brad Christensen.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: io.backend io.files io.files.info io.files.links io.files.types io.pathnames libc classes.struct accessors alien alien.c-types math io.backend.windows
-destructors kernel combinators sequences system windows.errors windows.kernel32 specialized-arrays strings ;
+destructors kernel combinators sequences system windows.errors windows.kernel32 specialized-arrays strings io.encodings.utf16n io.encodings.string ;
 IN: io.files.links.windows
 
 <PRIVATE
@@ -28,10 +28,11 @@ IN: io.files.links.windows
 
 SPECIALIZED-ARRAY: uchar
 
+! Need to use ReparseDataLength instead of  bytes-returned, and use PathBuffer or calc offset considing 12 bytes of other data.
 : (extract-substitute-path) ( REPARSE_DATA_BUFFER bytes-returned -- substitute-path )
     [ ReparseDataUnion>> dup GenericReparseBuffer>> >c-ptr ] dip <direct-uchar-array>
-    [ SymbolicLinkReparseBuffer>> [ SubstituteNameOffset>> ] [ SubstituteNameLength>> over + ] bi ] dip
-    <slice> >string ;
+    [ SymbolicLinkReparseBuffer>> [ SubstituteNameOffset>> 12 + ] [ SubstituteNameLength>> over + ] bi ] dip
+    <slice> utf16n decode ;
 
 : (read-symbolic-link) ( symlink -- path )
     [ (reparse-handle) (initial-reparse-data-buffer) 0 <ulong>
