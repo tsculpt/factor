@@ -1,4 +1,4 @@
-! Copyright (C) 2009 Slava Pestov, Doug Coleman, Brad Christensen.
+! Copyright (C) 2008 Slava Pestov, Doug Coleman, 2009 Brad Christensen.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors combinators io.backend io.files.info io.files.types
 io.pathnames kernel math namespaces system vocabs.loader ;
@@ -27,7 +27,7 @@ ERROR: not-a-soft-link path ;
 
 {
     { [ os unix? ] [ "io.files.links.unix" ] }
-    { [ os windows? ] [ "io.files.links.windows" ] }
+    { [ os winnt? ] [ "io.files.links.windows" ] }
 } cond require
 
 : follow-link ( path -- path' )

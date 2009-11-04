@@ -75,3 +75,5 @@ M: winnt resolve-symlinks ( path -- path' )
 ! get-file-information-stat does not dispose handle to file?
 
 ! link-info fix size / size-on-disk
+
+! limit to vista and up
